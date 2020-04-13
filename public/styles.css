@@ -1,0 +1,133 @@
+* {
+    color: #555;
+}
+
+.rs-main {
+
+}
+
+span {
+    display: inline-block;;
+}
+
+p {
+    padding: 0;
+    margin: 0;
+}
+
+ul, li {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+
+.popup {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: rgba(15, 15, 15, .6)
+}
+
+.popup-inner {
+
+}
+
+.form-wrapper-cr {
+    background: aliceblue;
+    padding: 24px 38px;
+    border-radius: 6px;
+}
+
+.item-task {
+    margin: 30px 0;
+    border: 1px solid #aaa;
+    padding: 20px;
+    border-radius: 10px;
+    position: relative;
+}
+
+.edit-icon {
+    position: absolute;;
+    top: 20px;
+    right: 24px;
+    font-size: 20px;
+    cursor: pointer;
+}
+
+.status {
+    display: flex;
+    justify-content: left;
+}
+
+.status .status-txt {
+    width: 200px;
+}
+
+.status .badge {
+    cursor: pointer;
+}
+
+.link-to-task {
+    font-size: 13px;
+}
+
+.paginator {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+}
+
+.pagination-item {
+    line-height: 25px;
+    height: 25px;
+    width: 25px;
+    text-align: center;
+    margin: 8px;
+}
+
+.pagination-item.active {
+
+}
+
+.pagination-item.active a {
+    cursor: default;
+    color: #aaa;
+}
+
+.pagination-item.active a:hover {
+    text-decoration: none;
+}
+
+.sorting {
+    padding: 20px 12px;
+    font-size: 14px;
+}
+
+.sorting.active a {
+    color: #555555;
+    cursor: default;
+}
+
+.sorting.active a:hover {
+    text-decoration: none;
+}
+.top_panel {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 30px;
+}
+.edited{
+    margin-left: auto;
+    margin-right:10px;
+}
+.error {
+    color:red;
+    font-size: 12px;
+}

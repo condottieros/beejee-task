@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link type="text/css" rel="stylesheet"
+          href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css"/>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+          integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="/public/styles.css"/>
+    <!--script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script-->
+    <script src="https://unpkg.com/vue/dist/vue.js"></script>
+    <script src="https://unpkg.com/vue-router/dist/vue-router.js"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+
+</head>
+
+<body>
+<div id="app">
+    <div class="container rs-main">
+        <div class="top_panel">
+            <ul class="nav ">
+                <li class="nav-item">
+                    <router-link class="nav-link" to="/tasks">Список</router-link>
+                </li>
+            </ul>
+            <div>
+                <button v-if="!$root.isAdmin" @click="showLogin=true" class="btn btn-sm btn-light">
+                    Вход
+                </button>
+                <button v-if="$root.isAdmin" class="btn btn-sm btn-light" @click="logout">
+                    Выход
+                </button>
+            </div>
+        </div>
+        <div>
+            <router-view></router-view>
+        </div>
+        <pop-up :show="showLogin" @clicked="showLogin=false">
+            <login-form></login-form>
+        </pop-up>
+    </div>
+</div>
+</body>
+
+<script id="" type="text/x-template"></script>
+
+
+<!--==============================  TASKS LIST =======================-->
+<script id="tasks-list" type="text/x-template">
+    <div>
+        <h3 class="text-center">Список задач</h3>
+        <div>
+            <span class="sorting" :class="{active:sort==='name'}">
+                <router-link :to="{path:'/tasks',query:{order,page,sort:'name'}}">По имени</router-link>
+            </span>
+            <span class="sorting" :class="{active:sort==='email'}">
+                <router-link :to="{path:'/tasks',query:{order,page,sort:'email'}}">По емайлу</router-link>
+            </span>
+            <span class="sorting" :class="{active:sort==='done'}">
+                <router-link :to="{path:'/tasks',query:{order,page,sort:'done'}}">По готовности</router-link>
+            </span>
+            <span class="sorting">
+                <router-link :to="{path:'/tasks',query:{order: order==='asc' ? 'desc':'asc',page, sort}}"><span
+                        :class="['fa', {'fa-arrow-up':order==='asc'},{'fa-arrow-down':order!=='asc'}]"></span>Упорядочить</router-link>
+            </span>
+        </div>
+        <div>
+            <button @click="showCreateForm=true" class="btn btn-sm btn-primary">Создать задачу</button>
+            <ul>
+                <li v-for="(task, i) in tasks" :key="task.id" class="item-task">
+                    <div>
+                        <p>{{task.id}}</p>
+                        <p class="item-name">Имя: {{task.name}}</p>
+                        <p> Email: {{task.email}}</p></div>
+                    <p class="status">
+                        <span class="status-txt">Статус: {{task.done?'Завершена':'Незавершена'}}</span>
+                        <span>
+                        <span class="badge badge-success" v-if="$root.isAdmin"
+                              @click="setConfirmed(task.id)">
+                                    Изменить
+                                </span>
+                        </span>
+                        <span class="edited">{{task.edited ? 'Отредактирована' : ''}}</span>
+
+                    </p>
+
+                    <div>Текст: {{task.text.slice(0,40)}}
+                        <p class="link-to-task">
+                            <router-link :to="`/task/${task.id}`">Подробно...</router-link>
+                        </p>
+                    </div>
+                    <div class="edit-icon" v-if="$root.isAdmin">
+                        <span @click="editForm(i)" class="fa fa-pencil"></span>
+                    </div>
+                </li>
+            </ul>
+            <ul class="paginator">
+                <li v-for="n in pages" :class="{active: page==n}" class="pagination-item">
+                    <router-link :to="createHref(n)">{{n}}</router-link>
+                </li>
+            </ul>
+        </div>
+        <pop-up :show="showCreateForm" @clicked="showCreateForm=false">
+            <create-task-form @newTask="newTask"></create-task-form>
+        </pop-up>
+        <pop-up :show="showEditForm" @clicked="showEditForm=false">
+            <edit-task-form :edit="true" @editedTask="taskEdited" :initTask="editedTask"></edit-task-form>
+        </pop-up>
+    </div>
+</script>
+
+<!--==============================  TASK ITEM  =======================-->
+<script id="task-item" type="text/x-template">
+    <div>
+        <h3 class="text-center">Задача</h3>
+        <button class="btn btn-primary btn-sm" @click="$router.back()"> назад</button>
+        <div v-if="task" class="item-task">
+            <div>
+                <p>{{task.id}}</p>
+                <p class="item-name">Имя: {{task.name}}</p>
+                <p> Email: {{task.email}}</p></div>
+            <p class="status">
+                <span class="status-txt">Статус: {{task.done?'Завершена':'Незавершена'}}</span>
+            </p>
+
+            <div>Текст: {{task.text}}
+
+            </div>
+        </div>
+        <div v-else="">Задача не найдена</div>
+    </div>
+</script>
+
+
+<script id="admin-login-form" type="text/x-template">
+    <div class="form-wrapper-cr">
+        <form @submit.prevent="send">
+            <div class="form-group">
+                <label>Логин</label>
+                <input v-model="login" class="form-control"/>
+                <span class="error">{{incorrectLogin}}</span>
+            </div>
+            <div class="form-group">
+                <label>Пароль</label>
+                <input v-model="password" class="form-control"/>
+                <span class="error">{{incorrectPassword}}</span>
+            </div>
+            <button type="submit" class="btn btn-primary">Войти</button>
+        </form>
+    </div>
+</script>
+
+<!--==============================  NEW TASK FORM  =======================-->
+<script id="new-task-form" type="text/x-template">
+    <div class="form-wrapper-cr">
+        <form @submit.prevent="sendForm">
+            <div class="form-group">
+                <label>Имя</label>
+                <input v-model="name" :disabled="edit" class="form-control"/>
+                <span v-if="!edit" class="error">{{incorrectName}}</span>
+            </div>
+            <div class="form-group">
+                <label>Емайл</label>
+                <input v-model="email" :disabled="edit" class="form-control"/>
+                <span v-if="!edit" class="error">{{incorrectEmail}}</span>
+            </div>
+            <div class="form-group">
+                <label>Текст задачи</label>
+                <textarea v-model="text" class="form-control"></textarea>
+                <span  class="error">{{incorrectText}}</span>
+            </div>
+            <button type="submit" class="btn btn-primary">Отправить</button>
+        </form>
+    </div>
+</script>
+
+<script id="common-popup" type="text/x-template">
+    <div v-if="show" @click="$emit('clicked')" class="popup">
+        <div @click.stop class="popup-inner">
+            <slot></slot>
+        </div>
+    </div>
+</script>
+<script src="/public/app.js"></script>
+</html>
